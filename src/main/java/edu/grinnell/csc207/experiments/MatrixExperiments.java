@@ -3,7 +3,6 @@ package edu.grinnell.csc207.experiments;
 import edu.grinnell.csc207.util.ArraySizeException;
 import edu.grinnell.csc207.util.Matrix;
 import edu.grinnell.csc207.util.MatrixV0;
-
 import java.io.PrintWriter;
 
 /**
@@ -18,15 +17,11 @@ public class MatrixExperiments {
   // +-----------+
 
   /**
-   * Create a figure with a matrix and a caption. The caption appears
-   * above the matrix.
+   * Create a figure with a matrix and a caption. The caption appears above the matrix.
    *
-   * @param pen
-   *   The tool used to print output.
-   * @param caption
-   *   A caption for the matrix
-   * @param matrix
-   *   The matrix to print.
+   * @param pen The tool used to print output.
+   * @param caption A caption for the matrix
+   * @param matrix The matrix to print.
    */
   static void figure(PrintWriter pen, String caption, Matrix matrix) {
     pen.println("=".repeat(80));
@@ -44,8 +39,7 @@ public class MatrixExperiments {
   /**
    * Run the sample from the assignment.
    *
-   * @param pen
-   *   The pen used to print out the results.
+   * @param pen The pen used to print out the results.
    */
   static void assignmentSample(PrintWriter pen) {
     Matrix<String> sample = new MatrixV0<String>(5, 6, "O");
@@ -106,8 +100,7 @@ public class MatrixExperiments {
   /**
    * Run the experiments.
    *
-   * @param args
-   *   Command-line arguments (ignored)
+   * @param args Command-line arguments (ignored)
    */
   public static void main(String[] args) {
     PrintWriter pen = new PrintWriter(System.out, true);

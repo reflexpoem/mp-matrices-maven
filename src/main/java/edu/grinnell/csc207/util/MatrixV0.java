@@ -1,291 +1,314 @@
 package edu.grinnell.csc207.util;
 
+import java.util.Arrays;
+
 /**
- * An implementation of two-dimensional matrices.
+ * A class that represents a grid (matrix) with rows and columns. It can hold values and lets you
+ * change the values in the grid.
  *
- * @author Your Name Here
- * @author Samuel A. Rebelsky
- *
- * @param <T>
- *   The type of values stored in the matrix.
+ * @param <T> the type of items that the grid holds
  */
-public class MatrixV0<T> implements Matrix<T> {
-  // +--------+------------------------------------------------------
-  // | Fields |
-  // +--------+
+public final class MatrixV0<T> implements Matrix<T> {
+  /** How many columns (left to right) the grid has. */
+  private int columns;
 
-  // +--------------+------------------------------------------------
-  // | Constructors |
-  // +--------------+
+  /** How many rows (top to bottom) the grid has. */
+  private int rows;
 
-  /**
-   * Create a new matrix of the specified width and height with the
-   * given value as the default.
-   *
-   * @param width
-   *   The width of the matrix.
-   * @param height
-   *   The height of the matrix.
-   * @param def
-   *   The default value, used to fill all the cells.
-   *
-   * @throws NegativeArraySizeException
-   *   If either the width or height are negative.
-   */
-  public MatrixV0(int width, int height, T def) {
-    // STUB
-  } // MatrixV0(int, int, T)
+  /** The grid where we store the items. */
+  private T[][] grid;
+
+  /** The default value to put in empty spaces. */
+  private T defaultValue;
 
   /**
-   * Create a new matrix of the specified width and height with
-   * null as the default value.
+   * A constructor that creates the grid with a certain number of columns and rows. It also sets a
+   * default value for empty spaces.
    *
-   * @param width
-   *   The width of the matrix.
-   * @param height
-   *   The height of the matrix.
-   *
-   * @throws NegativeArraySizeException
-   *   If either the width or height are negative.
+   * @param numColumns the number of columns
+   * @param numRows the number of rows
+   * @param defaultVal the default value for empty spaces
    */
-  public MatrixV0(int width, int height) {
-    this(width, height, null);
-  } // MatrixV0
-
-  // +--------------+------------------------------------------------
-  // | Core methods |
-  // +--------------+
+  @SuppressWarnings("unchecked")
+  public MatrixV0(int numColumns, int numRows, T defaultVal) {
+    if (numColumns < 1 || numRows < 1) {
+      throw new IllegalArgumentException("The grid must have at least one row and one column.");
+    } // end of if statement
+    this.columns = numColumns;
+    this.rows = numRows;
+    this.defaultValue = defaultVal;
+    this.grid = (T[][]) new Object[rows][columns];
+    for (int i = 0; i < rows; i++) {
+      Arrays.fill(this.grid[i], defaultValue);
+    } // end of for loop
+  } // Constructor with default value
 
   /**
-   * Get the element at the given row and column.
+   * A constructor that creates the grid with a certain number of columns and rows. No default value
+   * is set, so the grid starts empty.
    *
-   * @param row
-   *   The row of the element.
-   * @param col
-   *   The column of the element.
-   *
-   * @return the value at the specified location.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If either the row or column is out of reasonable bounds.
+   * @param numColumns the number of columns
+   * @param numRows the number of rows
    */
+  public MatrixV0(int numColumns, int numRows) {
+    this(numColumns, numRows, null);
+  } // Constructor without default value
+
+  /**
+   * Get the value at the given row and column in the grid.
+   *
+   * @param row the row number
+   * @param col the column number
+   * @return the value at the specified position
+   */
+  @Override
   public T get(int row, int col) {
-    return null;        // STUB
-  } // get(int, int)
+    checkIndex(row, col);
+    return grid[row][col];
+  } // get
 
   /**
-   * Set the element at the given row and column.
+   * Set a value in the grid at the given row and column.
    *
-   * @param row
-   *   The row of the element.
-   * @param col
-   *   The column of the element.
-   * @param val
-   *   The value to set.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If either the row or column is out of reasonable bounds.
+   * @param row the row number
+   * @param col the column number
+   * @param value the value to place in the grid
    */
-  public void set(int row, int col, T val) {
-    // STUB
-  } // set(int, int, T)
+  @Override
+  public void set(int row, int col, T value) {
+    checkIndex(row, col);
+    grid[row][col] = value;
+  } // set
 
   /**
-   * Determine the number of rows in the matrix.
+   * Add a new row at a specific position in the grid.
    *
-   * @return the number of rows.
+   * @param rowIndex where to insert the new row
    */
-  public int height() {
-    return 5;   // STUB
-  } // height()
+  @Override
+  @SuppressWarnings("unchecked")
+  public void insertRow(int rowIndex) {
+    if (rowIndex < 0 || rowIndex > rows) {
+      throw new IndexOutOfBoundsException("Invalid row number");
+    } // end of if statement
+    grid = Arrays.copyOf(grid, rows + 1);
+    for (int i = rows; i > rowIndex; i--) {
+      grid[i] = grid[i - 1];
+    } // end of for loop
+    grid[rowIndex] = (T[]) new Object[columns];
+    Arrays.fill(grid[rowIndex], defaultValue);
+    rows++;
+  } // insertRow
 
   /**
-   * Determine the number of columns in the matrix.
+   * Add a new row with specific values at a certain position in the grid.
    *
-   * @return the number of columns.
+   * @param rowIndex where to insert the new row
+   * @param rowValues the values to put in the new row
+   * @throws ArraySizeException if the size of the row is incorrect
    */
-  public int width() {
-    return 3;   // STUB
-  } // width()
+  @Override
+  public void insertRow(int rowIndex, T[] rowValues) throws ArraySizeException {
+    if (rowValues.length != columns) {
+      throw new ArraySizeException("Row size doesn't match the number of columns.");
+    } // end of if statement
+    insertRow(rowIndex);
+    grid[rowIndex] = rowValues;
+  } // insertRow with values
 
   /**
-   * Insert a row filled with the default value.
+   * Add a new column at a specific position in the grid.
    *
-   * @param row
-   *   The number of the row to insert.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the row is negative or greater than the height.
+   * @param colIndex where to insert the new column
    */
-  public void insertRow(int row) {
-    // STUB
-  } // insertRow(int)
+  @Override
+  public void insertCol(int colIndex) {
+    if (colIndex < 0 || colIndex > columns) {
+      throw new IndexOutOfBoundsException("Invalid column number");
+    } // end of if statement
+    for (int i = 0; i < rows; i++) {
+      grid[i] = Arrays.copyOf(grid[i], columns + 1);
+      for (int j = columns; j > colIndex; j--) {
+        grid[i][j] = grid[i][j - 1];
+      } // end of for loop
+      grid[i][colIndex] = defaultValue;
+    } // end of for loop
+    columns++;
+  } // insertCol
 
   /**
-   * Insert a row filled with the specified values.
+   * Add a new column with specific values at a certain position in the grid.
    *
-   * @param row
-   *   The number of the row to insert.
-   * @param vals
-   *   The values to insert.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the row is negative or greater than the height.
-   * @throws ArraySizeException
-   *   If the size of vals is not the same as the width of the matrix.
+   * @param colIndex where to insert the new column
+   * @param colValues the values to put in the new column
+   * @throws ArraySizeException if the size of the column is incorrect
    */
-  public void insertRow(int row, T[] vals) throws ArraySizeException {
-    // STUB
-  } // insertRow(int, T[])
+  @Override
+  public void insertCol(int colIndex, T[] colValues) throws ArraySizeException {
+    if (colValues.length != rows) {
+      throw new ArraySizeException("Column size doesn't match the number of rows.");
+    } // end of if statement
+    insertCol(colIndex);
+    for (int i = 0; i < rows; i++) {
+      grid[i][colIndex] = colValues[i];
+    } // end of for loop
+  } // insertCol with values
 
   /**
-   * Insert a column filled with the default value.
+   * Delete a row from the grid at a certain position.
    *
-   * @param col
-   *   The number of the column to insert.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the column is negative or greater than the width.
+   * @param rowIndex the row to remove
    */
-  public void insertCol(int col) {
-    // STUB
-  } // insertCol(int)
+  @Override
+  public void deleteRow(int rowIndex) {
+    checkRow(rowIndex);
+    for (int i = rowIndex; i < rows - 1; i++) {
+      grid[i] = grid[i + 1];
+    } // end of for loop
+    rows--;
+    grid = Arrays.copyOf(grid, rows);
+  } // deleteRow
 
   /**
-   * Insert a column filled with the specified values.
+   * Delete a column from the grid at a certain position.
    *
-   * @param col
-   *   The number of the column to insert.
-   * @param vals
-   *   The values to insert.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the column is negative or greater than the width.
-   * @throws ArraySizeException
-   *   If the size of vals is not the same as the height of the matrix.
+   * @param colIndex the column to remove
    */
-  public void insertCol(int col, T[] vals) throws ArraySizeException {
-    // STUB
-  } // insertCol(int, T[])
+  @Override
+  public void deleteCol(int colIndex) {
+    checkCol(colIndex);
+    for (int i = 0; i < rows; i++) {
+      for (int j = colIndex; j < columns - 1; j++) {
+        grid[i][j] = grid[i][j + 1];
+      } // end of for loop
+      grid[i] = Arrays.copyOf(grid[i], columns - 1);
+    } // end of for loop
+    columns--;
+  } // deleteCol
 
   /**
-   * Delete a row.
+   * Fill a part of the grid with a certain value.
    *
-   * @param row
-   *   The number of the row to delete.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the row is negative or greater than or equal to the height.
+   * @param startRow the starting row (inclusive)
+   * @param startCol the starting column (inclusive)
+   * @param endRow the ending row (exclusive)
+   * @param endCol the ending column (exclusive)
+   * @param value the value to fill in the grid
    */
-  public void deleteRow(int row) {
-    // STUB
-  } // deleteRow(int)
+  @Override
+  public void fillRegion(int startRow, int startCol, int endRow, int endCol, T value) {
+    for (int i = startRow; i < endRow; i++) {
+      for (int j = startCol; j < endCol; j++) {
+        set(i, j, value);
+      } // end of for loop
+    } // end of for loop
+  } // fillRegion
 
   /**
-   * Delete a column.
+   * Fill a line in the grid with a certain value.
    *
-   * @param col
-   *   The number of the column to delete.
-   *
-   * @throws IndexOutOfBoundsException
-   *   If the column is negative or greater than or equal to the width.
+   * @param startRow the starting row
+   * @param startCol the starting column
+   * @param rowStep the row step size (how many rows to move down each time)
+   * @param colStep the column step size (how many columns to move right each time)
+   * @param endRow the ending row
+   * @param endCol the ending column
+   * @param value the value to fill in the grid
    */
-  public void deleteCol(int col) {
-    // STUB
-  } // deleteCol(int)
+  @Override
+  public void fillLine(
+      int startRow, int startCol, int rowStep, int colStep, int endRow, int endCol, T value) {
+    int currentRow = startRow;
+    int currentCol = startCol;
+    while (currentRow < endRow && currentCol < endCol) {
+      set(currentRow, currentCol, value);
+      currentRow += rowStep;
+      currentCol += colStep;
+    } // end of while loop
+  } // fillLine
+
+  // Check if the row and column are valid
+  private void checkIndex(int rowIndex, int colIndex) {
+    if (rowIndex < 0 || rowIndex >= rows || colIndex < 0 || colIndex >= columns) {
+      throw new IndexOutOfBoundsException("Invalid row or column number.");
+    } // end of if statement
+  } // checkIndex
+
+  // Check if the row is valid
+  private void checkRow(int rowIndex) {
+    if (rowIndex < 0 || rowIndex >= rows) {
+      throw new IndexOutOfBoundsException("Invalid row number.");
+    } // end of if statement
+  } // checkRow
+
+  // Check if the column is valid
+  private void checkCol(int colIndex) {
+    if (colIndex < 0 || colIndex >= columns) {
+      throw new IndexOutOfBoundsException("Invalid column number.");
+    } // end of if statement
+  } // checkCol
 
   /**
-   * Fill a rectangular region of the matrix.
+   * Make a copy of the grid.
    *
-   * @param startRow
-   *   The top edge / row to start with (inclusive).
-   * @param startCol
-   *   The left edge / column to start with (inclusive).
-   * @param endRow
-   *   The bottom edge / row to stop with (exclusive).
-   * @param endCol
-   *   The right edge / column to stop with (exclusive).
-   * @param val
-   *   The value to store.
-   *
-   * @throw IndexOutOfBoundsException
-   *   If the rows or columns are inappropriate.
+   * @return a copy of this grid
    */
-  public void fillRegion(int startRow, int startCol, int endRow, int endCol,
-      T val) {
-    // STUB
-  } // fillRegion(int, int, int, int, T)
+  @Override
+  public MatrixV0<T> clone() {
+    MatrixV0<T> copy = new MatrixV0<>(columns, rows, defaultValue);
+    for (int i = 0; i < rows; i++) {
+      copy.grid[i] = Arrays.copyOf(this.grid[i], this.columns);
+    } // end of for loop
+    return copy;
+  } // clone
 
   /**
-   * Fill a line (horizontal, vertical, diagonal).
+   * Check if two grids are the same.
    *
-   * @param startRow
-   *   The row to start with (inclusive).
-   * @param startCol
-   *   The column to start with (inclusive).
-   * @param deltaRow
-   *   How much to change the row in each step.
-   * @param deltaCol
-   *   How much to change the column in each step.
-   * @param endRow
-   *   The row to stop with (exclusive).
-   * @param endCol
-   *   The column to stop with (exclusive).
-   * @param val
-   *   The value to store.
-   *
-   * @throw IndexOutOfBoundsException
-   *   If the rows or columns are inappropriate.
+   * @param obj the other object to compare
+   * @return true if the grids are the same, false otherwise
    */
-  public void fillLine(int startRow, int startCol, int deltaRow, int deltaCol,
-      int endRow, int endCol, T val) {
-    // STUB
-  } // fillLine(int, int, int, int, int, int, T)
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    } // end of if statement
+    if (!(obj instanceof MatrixV0)) {
+      return false;
+    } // end of if statement
+    MatrixV0<?> other = (MatrixV0<?>) obj;
+    return this.columns == other.columns
+        && this.rows == other.rows
+        && Arrays.deepEquals(this.grid, other.grid);
+  } // equals
 
   /**
-   * A make a copy of the matrix. May share references (e.g., if individual
-   * elements are mutable, mutating them in one matrix may affect the other
-   * matrix) or may not.
+   * Returns a hash code for the grid.
    *
-   * @return a copy of the matrix.
+   * @return the hash code
    */
-  public Matrix clone() {
-    return this;        // STUB
-  } // clone()
-
-  /**
-   * Determine if this object is equal to another object.
-   *
-   * @param other
-   *   The object to compare.
-   *
-   * @return true if the other object is a matrix with the same width,
-   * height, and equal elements; false otherwise.
-   */
-  public boolean equals(Object other) {
-    return this == other;       // STUB
-  } // equals(Object)
-
-  /**
-   * Compute a hash code for this matrix. Included because any object
-   * that implements `equals` is expected to implement `hashCode` and
-   * ensure that the hash codes for two equal objects are the same.
-   *
-   * @return the hash code.
-   */
+  @Override
   public int hashCode() {
-    int multiplier = 7;
-    int code = this.width() + multiplier * this.height();
-    for (int row = 0; row < this.height(); row++) {
-      for (int col = 0; col < this.width(); col++) {
-        T val = this.get(row, col);
-        if (val != null) {
-          // It's okay if the following computation overflows, since
-          // it will overflow uniformly.
-          code = code * multiplier + val.hashCode();
-        } // if
-      } // for col
-    } // for row
-    return code;
-  } // hashCode()
-} // class MatrixV0
+    return Arrays.deepHashCode(grid);
+  } // hashCode
+
+  /**
+   * Get the number of columns in the grid.
+   *
+   * @return the number of columns
+   */
+  @Override
+  public int width() {
+    return columns;
+  } // width
+
+  /**
+   * Get the number of rows in the grid.
+   *
+   * @return the number of rows
+   */
+  @Override
+  public int height() {
+    return rows;
+  } // height
+} // MatrixV0
